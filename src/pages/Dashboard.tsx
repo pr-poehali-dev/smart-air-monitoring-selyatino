@@ -1,6 +1,9 @@
+import { Suspense, lazy } from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
+
+const Map = lazy(() => import('@/components/Map'));
 
 export default function Dashboard() {
   const alerts = [
@@ -14,6 +17,54 @@ export default function Dashboard() {
     { id: 2, location: 'ул. Ленина, 15', fill: 95, status: 'critical' },
     { id: 3, location: 'пр. Мира, 20', fill: 45, status: 'normal' },
     { id: 4, location: 'Парк культуры', fill: 60, status: 'normal' },
+  ];
+
+  const mapPoints = [
+    {
+      id: 1,
+      position: [55.520, 37.310] as [number, number],
+      title: 'Датчик №1 - Центральная площадь',
+      description: 'PM2.5: 12.3 мкг/м³',
+      type: 'sensor' as const,
+    },
+    {
+      id: 2,
+      position: [55.515, 37.305] as [number, number],
+      title: 'Датчик №2 - ул. Ленина',
+      description: 'PM2.5: 15.1 мкг/м³',
+      type: 'sensor' as const,
+    },
+    {
+      id: 3,
+      position: [55.512, 37.300] as [number, number],
+      title: 'Датчик №3 - Парк культуры',
+      description: 'PM2.5: 8.7 мкг/м³',
+      type: 'sensor' as const,
+    },
+    {
+      id: 4,
+      position: [55.518, 37.308] as [number, number],
+      title: 'Переполненный контейнер',
+      description: 'ул. Ленина, 15 • Заполнение 95%',
+      type: 'waste' as const,
+      severity: 'high' as const,
+    },
+    {
+      id: 5,
+      position: [55.514, 37.312] as [number, number],
+      title: 'Разбитая дорога',
+      description: 'пр. Мира, 42 • Требует ремонта',
+      type: 'road' as const,
+      severity: 'medium' as const,
+    },
+    {
+      id: 6,
+      position: [55.522, 37.302] as [number, number],
+      title: 'Мусор на обочине',
+      description: 'ул. Садовая, 8',
+      type: 'problem' as const,
+      severity: 'low' as const,
+    },
   ];
 
   return (
@@ -193,15 +244,36 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Icon name="MapPin" size={20} />
-                Карта проблемных зон
+                Карта территории
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-accent/30 rounded-lg h-64 flex items-center justify-center">
-                <div className="text-center text-muted-foreground">
-                  <Icon name="Map" size={48} className="mx-auto mb-2 opacity-50" />
-                  <p>Интерактивная карта</p>
-                  <p className="text-sm">с отметками датчиков и проблемных зон</p>
+              <div className="h-64 rounded-lg overflow-hidden">
+                <Suspense
+                  fallback={
+                    <div className="h-full bg-accent/30 flex items-center justify-center">
+                      <div className="text-center text-muted-foreground">
+                        <Icon name="Loader2" size={32} className="mx-auto mb-2 opacity-50 animate-spin" />
+                        <p className="text-sm">Загрузка карты...</p>
+                      </div>
+                    </div>
+                  }
+                >
+                  <Map points={mapPoints} center={[55.516, 37.305]} zoom={14} />
+                </Suspense>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-muted-foreground">Датчики воздуха</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <span className="text-muted-foreground">Критические проблемы</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <span className="text-muted-foreground">Требует внимания</span>
                 </div>
               </div>
             </CardContent>
